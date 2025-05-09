@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Math Expression Game</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      text-align: center;
+      padding: 20px;
+      background: #f0f4f8;
+    }
+
+    .container {
+      max-width: 400px;
+      margin: auto;
+      padding: 40px;
+      background: hsl(195, 61%, 86%);
+      border-radius: 20px;
+      box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    }
+
+    .expression {
+      font-size: 1.5rem;
+      margin-bottom: 15px;
+    }
+
+    input[type="number"] {
+      width: 100%;
+      padding: 10px;
+      font-size: 1rem;
+      border: 1px solid #8c1212;
+      border-radius: 5px;
+      margin-bottom: 10px;
+    }
+
+    .result {
+      font-size: 1.2rem;
+      margin: 10px 0;
+      font-weight: bold;
+    }
+
+    .right {
+      color: green;
+    }
+
+    .wrong {
+      color: red;
+    }
+
+    .game-over {
+      font-size: 1.3rem;
+      color: red;
+      font-weight: bold;
+      margin-top: 10px;
+    }
+
+    .score,
+    .timer {
+      font-size: 1.1rem;
+      margin: 20px 0;
+      /* This adds space above and below */
+    }
+
+
+    button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      hover: pointer;
+      margin-top: 10px;
+      border: rgba(0, 0, 0, 0.1) solid 1px;
+
+      border-radius: 10px;
+      background: #013770;
+      color: white;
+    }
+
+    button:hover {
+      background: #0056b3;
+    }
+
+    @media (max-width: 500px) {
+      .expression {
+        font-size: 1.2rem;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="score">Score: <span id="score">0</span></div>
+    <div class="timer">Time Left: <span id="timer">60</span>s</div>
+    <div class="expression" id="expression"></div>
+    <input type="number" id="answer" placeholder="Enter your answer" />
+    <div class="result" id="result"></div>
+    <div class="game-over" id="game-over"></div>
+    <div class="game-over" id="game-over"></div>
+    <button id="next-btn" onclick="nextExpression()">Next</button>
+    <button id="play-again" style="display:none;" onclick="restartGame()">Play Again</button>
+
+  </div>
+
+  <script>
+    let currentAnswer = 0;
+    let score = 0;
+    let timeLeft = 60;
+    let timerInterval;
+
+    const expressionEl = document.getElementById("expression");
+    const answerEl = document.getElementById("answer");
+    const resultEl = document.getElementById("result");
+    const scoreEl = document.getElementById("score");
+    const timerEl = document.getElementById("timer");
+    const gameOverEl = document.getElementById("game-over");
+
+    function generateExpression() {
+      let numTerms = Math.floor(Math.random() * 4) + 4; // 4 to 7 terms
+      let expression = "";
+      let result = 0;
+
+      for (let i = 0; i < numTerms; i++) {
+        let number = Math.floor(Math.random() * 50) + 1;
+        let operator = i === 0 ? "" : (Math.random() > 0.5 ? "+" : "-");
+        expression += `${operator}${number}`;
+      }
+
+      try {
+        result = eval(expression);
+      } catch {
+        result = 0;
+      }
+
+      expressionEl.textContent = expression;
+      currentAnswer = result;
+      answerEl.value = "";
+      resultEl.textContent = "";
+      resultEl.className = "result";
+      gameOverEl.textContent = "";
+
+      answerEl.disabled = false;
+      answerEl.focus();
+
+      resetTimer();
+    }
+
+    function resetTimer() {
+      clearInterval(timerInterval);
+      timeLeft = 60;
+      timerEl.textContent = timeLeft;
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        timerEl.textContent = timeLeft;
+
+        if (timeLeft <= 0) {
+          clearInterval(timerInterval);
+          gameOver();
+        }
+      }, 1000);
+    }
+
+    function gameOver() {
+      gameOverEl.textContent = "⛔ Game Over!";
+      answerEl.disabled = true;
+      document.getElementById("play-again").style.display = "inline-block";
+      document.getElementById("next-btn").style.display = "none";
+    }
+
+
+
+    answerEl.addEventListener("input", function () {
+      const userValue = parseInt(this.value);
+      if (isNaN(userValue)) {
+        resultEl.textContent = "";
+        resultEl.className = "result";
+        return;
+      }
+
+      if (userValue === currentAnswer) {
+        resultEl.textContent = "Right";
+        resultEl.className = "result right";
+        score++;
+        scoreEl.textContent = score;
+        clearInterval(timerInterval);
+      } else {
+        resultEl.textContent = "Wrong";
+        resultEl.className = "result wrong";
+      }
+    });
+
+    function nextExpression() {
+      generateExpression();
+    }
+    function restartGame() {
+      score = 0;
+      scoreEl.textContent = score;
+      gameOverEl.textContent = "";
+      document.getElementById("play-again").style.display = "none";
+      document.getElementById("next-btn").style.display = "inline-block";
+      nextExpression();
+    }
+
+
+
+    // Start game
+    generateExpression();
+  </script>
+</body>
+
+</html>
